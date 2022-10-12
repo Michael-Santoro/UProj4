@@ -223,11 +223,13 @@ int main ()
   //steering range is between [-1.2, 1.2]
   
   //PID takes as input the proportion (tau_p), integral(tau_i), derivative (tau_d), max, min
-  pid_steer.Init(0.0, 0.0, 0.0, 1.2, -1.2); //Step 2
-
-  
-  
-  
+  //pid_steer.Init(0.0, 0.0, 0.0, 1.2, -1.2); //Step 2: Exp1 and Exp2 Settings
+  //pid_steer.Init(0.7, 0.0, 0.0, 1.2, -1.2); //Exp3: Not enough steer output to move car
+  //pid_steer.Init(1.2, 0.0, 0.0, 1.2, -1.2); //Exp4: Not enough steer output to move car
+  //pid_steer.Init(1.2, 0.5, 0.5, 1.2, -1.2); //Exp5: Car Corrected to Soon, Reduce derivative
+  //pid_steer.Init(1.2, 0.5, 0.1, 1.2, -1.2); //Exp6: Car is steering back and forth, Increase derivative
+  //pid_steer.Init(1.2, 0.5, 0.1, 1.2, -1.2); //Exp6: Car is steering back and forth, Increase derivative
+  pid_steer.Init(1.2, 0.75, 0.75, 1.2, -1.2); //Exp6: Car is steering back and forth, Increase Integral term
   // initialize pid throttle
   /**
   * TODO (Step 1): create pid (pid_throttle) for throttle command and initialize values
@@ -236,8 +238,8 @@ int main ()
   
   //accelerator range is between [-1,1]
   
-  pid_throttle.Init(0.5, 0.0, 0.0, 1.0, -1.0); //Step 1
-  
+  //pid_throttle.Init(0.5, 0.0, 0.0, 1.0, -1.0); //Exp1: Accelration is Good with Porpotional Gain
+  pid_throttle.Init(0.15, 0.001, 0.1, 1.0, -1.0); //Exp2: Car Slows at good distance from first car
   
   h.onMessage([&pid_steer, &pid_throttle, &new_delta_time, &timer, &prev_timer, &i, &prev_timer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
   {
