@@ -21,4 +21,8 @@ In this project simulations will be ran using the Carla simulator there is a bas
 
 
 - PID controller is a model free controller, i.e. it does not use a model of the car. Could you explain the pros and cons of this type of controller?
+*A model free controller is an alternative approach to control complex systems by using a simplified representation of the system and subsequent algebraic estimation techniques to design a simple, but effective, trajectory tracking controller. This is an advantage as we can make calculations quicker and easier and do not need to worry about complex details such as wind drag, or the static friction coeffiecient of the road.* 
+
 - (Optional) What would you do to improve the PID controller?
+
+
