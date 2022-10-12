@@ -15,14 +15,15 @@ In this project simulations will be ran using the Carla simulator there is a bas
 
 
 - What is the effect of the PID according to the plots, how each part of the PID affects the control command?
-
+You can see the out put tracks with the error.
 
 - How would you design a way to automatically tune the PID parameters?
+I would use a type of grid search since the parameters are all related in the complex system. I would systematically change one gain, then have a way to score the out put and any collisions would parameters would be disregarded.
 
 
 - PID controller is a model free controller, i.e. it does not use a model of the car. Could you explain the pros and cons of this type of controller?
-*A model free controller is an alternative approach to control complex systems by using a simplified representation of the system and subsequent algebraic estimation techniques to design a simple, but effective, trajectory tracking controller. This is an advantage as we can make calculations quicker and easier and do not need to worry about complex details such as wind drag, or the static friction coeffiecient of the road.* 
+A model free controller is an alternative approach to control complex systems by using a simplified representation of the system and subsequent algebraic estimation techniques to design a simple, but effective, trajectory tracking controller. This is an advantage as we can make calculations quicker and easier and do not need to worry about complex details such as wind drag, or the static friction coeffiecient of the road.
 
 - (Optional) What would you do to improve the PID controller?
-
+I think something a little more complicated would be good for instance for the throttle some rate limited control so that we are not just outputting 1 or 0. Tuning the parameters felt a bit rudementary I think some additional knobs would be helpful.
 
