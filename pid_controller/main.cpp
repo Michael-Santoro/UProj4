@@ -220,21 +220,11 @@ int main ()
   **/
   PID pid_steer = PID();
   
-  //steering range is between  [-1.2, 1.2]
+  //steering range is between [-1.2, 1.2]
   
   //PID takes as input the proportion (tau_p), integral(tau_i), derivative (tau_d), max, min
-  //pid_steer.Init(0.1, 0.001, 0.001, 1.2, -1.2); //Car Did Not Move
-  //pid_steer.Init(0.6, 0.002, 0.1, 1.2, -1.2); //Car Did Not Move
-  //pid_steer.Init(1.0, 0.002, 0.1, 1.2, -1.2); //Car Just Accelrates and Crashes
-  //pid_steer.Init(0.1, 0.001, 0.001, 1.2, -1.2); //Car does not turn just accelerates straight and crashes
-  //pid_steer.Init(0.6, 0.001, 0.1, 1.2, -1.2);//Car Turned but then did not sustain turn, increase derivative
-  //pid_steer.Init(0.6, 0.002, 0.2, 1.2, -1.2);//Car Turns right but not enough trying to reduce integral param
-  //pid_steer.Init(0.8, 0.005, 0.15, 1.2, -1.2);//Starts off good but then turns back toward car
-  //pid_steer.Init(0.8, 0.005, 0.3, 1.2, -1.2);//Car Turns right but not enough trying to reduce integral param
-  //pid_steer.Init(0.8, 0.005, 0.2, 1.2, -1.2);//Car Did not turn fast enough
-  //pid_steer.Init(1.5, 0.025, 0.15, 1.2, -1.2);//Car Did not turn fast enough
-  //pid_steer.Init(1.5, 0.025, 0.15, 1.0, -1.0);//Starting Over Car Keeps Crashing
-  pid_steer.Init(0.8, 0.005, 0.15, 1.0, -1.0);//Car Did not turn fast enough
+  pid_steer.Init(0.0, 0.0, 0.0, 1.2, -1.2); //Step 2
+
   
   
   
@@ -244,22 +234,9 @@ int main ()
   **/
   PID pid_throttle = PID();
   
-  //Vel must in range of [-1,1]
-
-  //pid_throttle.Init(0.1, 0.1, 0.1, 1.0, -1.0); //Car Did Not Move
-  //pid_throttle.Init(0.8, 0.001, 0.001, 1.0, -1.0); //Car Did Not Move
-  //pid_throttle.Init(0.5, 0.001, 0.1, 1.0, -1.0); //Car Did Not Move
-  //pid_throttle.Init(1.0, 0.001, 0.1, 1.0, -1.0); //Car Did Not Move
-  //pid_throttle.Init(0.1, 0.1, 0.1, 1.0, -1.0); //Car accelerates smoothly, try redcucing integral param
-  //pid_throttle.Init(0.1, 0.001, 0.2, 1.0, -1.0); //Car accelerates smoothly
-  //pid_throttle.Init(0.2, 0.005, 0.08, 1.0, -1.0); //Car accelerates smoothly
-  //pid_throttle.Init(0.1, 0.0015, 0.02, 1.0, -1.0); //Car slows to quickly
-  //pid_throttle.Init(0.1, 0.0015, 0.015, 1.0, -1.0); //Car accelerates smoothly
-  //pid_throttle.Init(0.5, 0.05, 0.05, 1.0, -1.0); //Car accelerates smoothly
-    //pid_throttle.Init(0.15, 0.005, 0.015, 1.0, -1.0); //Car accelerates smoothly
-   //pid_throttle.Init(0.15, 0.005, 0.01, .8, -1.0); //Car accelerates smoothly
-  //pid_throttle.Init(0.2, 0.005, 0.08, .8, -1.0); //Car Brakes to hard
-  pid_throttle.Init(0.2, 0.005, 0.02, .8, -1.0); //Car accelerates smoothly
+  //accelerator range is between [-1,1]
+  
+  pid_throttle.Init(0.5, 0.0, 0.0, 1.0, -1.0); //Step 1
   
   
   h.onMessage([&pid_steer, &pid_throttle, &new_delta_time, &timer, &prev_timer, &i, &prev_timer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
@@ -334,7 +311,11 @@ int main ()
           /**
           * TODO (step 3): compute the steer error (error_steer) from the position and the desired trajectory
           **/
-           error_steer = angle_between_points(x_points[x_points.size() - 2], y_points[y_points.size() - 2], x_points.back(), y_points.back())-yaw;
+          
+          //The first term 'angle_between_points(x_points[x_points.size() - 2], y_points[y_points.size() - 2], x_points.back(), y_points.back())' is basically the calculated yaw from the path planner repreated here.
+          //Yaw is the acutal rotation of the car.
+          //So the calculation can be thought of as difference between the planned yaw and actual yaw.
+          error_steer = angle_between_points(x_points[x_points.size() - 2], y_points[y_points.size() - 2], x_points.back(), y_points.back())-yaw;
 
           /**
           * TODO (step 3): uncomment these lines
@@ -368,6 +349,9 @@ int main ()
           * TODO (step 2): compute the throttle error (error_throttle) from the position and the desired speed
           **/
           // modify the following line for step 2
+          
+          //The first term 'v_points.back()' represents the velocity term stored in the last entry of the v_points vector.
+          //The calculation can be thought of as the difference between planned and actual.
           error_throttle = v_points.back() - velocity;
 
 
