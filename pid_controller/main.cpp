@@ -77,22 +77,6 @@ template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
-double getAverage(vector<double> arr, int size) {
-  int i, sum = 0;       
-  double avg;
-  int j = arr.size();
-  if (j < size) {
-    size = j;
-  }
-
-   for (i = 0; i < size; ++i) {
-     sum += arr[j];
-     j-=1;
-   }
-   avg = double(sum) / size;
-
-   return avg;
-}
 
 double angle_between_points(double x1, double y1, double x2, double y2){
   return atan2(y2-y1, x2-x1);
@@ -247,9 +231,15 @@ int main ()
   //pid_steer.Init(1.2, 0.5, 0.1, 1.2, -1.2); //Exp6: Car is steering back and forth, Increase derivative
   //pid_steer.Init(1.2, 0.5, 0.1, 1.2, -1.2); //Exp6: Car is steering back and forth, Increase derivative
   //pid_steer.Init(1.2, 0.75, 0.75, 1.2, -1.2); //Exp6: Car is steering back and forth, Increase Integral term
-  pid_steer.Init(0.3, 0.01, 0.1, 1.2, -1.2); //Exp7: Car is steering back and forth, Increase Integral term
-  
-  
+  //pid_steer.Init(0.3, 0.01, 0.1, 1.2, -1.2); //Exp7: Car is steering back and forth, Increase Integral term
+  //pid_steer.Init(0.35, 0.01, 0.175, 1.2, -1.2); //Exp8: Car is steering back and forth, Increase Integral term
+  //pid_steer.Init(0.4, 0.01, 0.16, 1.2, -1.2); //Exp8: Car is steering back and forth, Increase Integral term
+  //pid_steer.Init(0.6, 0.002, 0.3, 1.2, -1.2); //Exp30
+  //pid_steer.Init(0.6, 0.0015, 0.5, 1.2, -1.2); //Exp31
+  //pid_steer.Init(0.32, 0.05, 0.1, 1.2, -1.2); 
+  //pid_steer.Init(0.6, 0.002, 0.1, 1.2, -1.2); // Good State
+  //pid_steer.Init(0.6, 0.002, 0.6, 1.2, -1.2); //No Crashes
+  pid_steer.Init(0.2, 0.001, 0.2, 1.2, -1.2); //No Crashes
   
   // initialize pid throttle
   /**
@@ -261,10 +251,16 @@ int main ()
   
   //pid_throttle.Init(0.5, 0.0, 0.0, 1.0, -1.0); //Exp1: Accelration is Good with Porpotional Gain
   //pid_throttle.Init(0.15, 0.001, 0.1, 1.0, -1.0); //Exp2: Car Slows at good distance from first car
-  pid_throttle.Init(0.2, 0.0009, 0.1, 1.0, -1.0); //Exp7: Car Slows at good distance from first car
-  int window = 5;
+  //pid_throttle.Init(0.18, 0.0009, 0.18, 1.0, -1.0); //Exp7: Car Slows at good distance from first car
+  //pid_throttle.Init(0.2, 0.001, 0.1, 1.0, -1.0); //Exp7: Car Slows at good distance from first car
+  //pid_throttle.Init(0.19, 0.001, 0.17, 1.0, -1.0); //Exp31
+  //pid_throttle.Init(0.2, 0.001, 0.25, 1.0, -1.0); //Exp31
+  //pid_throttle.Init(0.2, 0.001, 0.1, 1.0, -1.0);//good state
+  //pid_throttle.Init(0.2, 0.001, 0.2, 1.0, -1.0);//No Crashes
+  pid_throttle.Init(0.2, 0.001, 0.1, 1.0, -1.0);//good state
+
   
-  h.onMessage([&pid_steer, &pid_throttle, &new_delta_time, &timer, &prev_timer, &i, &prev_timer,&window](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
+  h.onMessage([&pid_steer, &pid_throttle, &new_delta_time, &timer, &prev_timer, &i, &prev_timer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
   {
         auto s = hasData(data);
 
@@ -332,15 +328,26 @@ int main ()
 
 
           double steer_output;
-          vector<double> steer_outputs;
           /**
           * TODO (step 3): compute the steer error (error_steer) from the position and the desired trajectory
           **/
+          // find the closest point on the path
+          double dis_min = 10000.0;
+          int close_id = 0;
+          for (int i =0; i< x_points.size(); ++i)
+          {
+            double act_dis = pow((x_position - x_points[i]),2) + pow((y_position - y_points[i]),2);
+            if (act_dis < dis_min)
+            {
+              dis_min = act_dis;
+              close_id = i;
+            }
+          }
           
           //The first term 'angle_between_points(x_points[x_points.size() - 2], y_points[y_points.size() - 2], x_points.back(), y_points.back())' is basically the calculated yaw from the path planner repreated here.
           //Yaw is the acutal rotation of the car.
           //So the calculation can be thought of as difference between the planned yaw and actual yaw.
-          error_steer = angle_between_points(x_points[x_points.size() - 2], y_points[y_points.size() - 2], x_points.back(), y_points.back())-yaw;
+          error_steer = angle_between_points(x_position,y_position,x_points[close_id],y_points[close_id])-yaw;
 
           /**
           * TODO (step 3): uncomment these lines
@@ -348,9 +355,7 @@ int main ()
            // Compute control to apply
            pid_steer.UpdateError(error_steer);
           
-          steer_outputs.push_back(pid_steer.TotalError());
-          
-           steer_output = getAverage(steer_outputs,window);
+           steer_output = pid_steer.TotalError();
 
            // Save data
            file_steer.seekg(std::ios::beg);
@@ -380,22 +385,20 @@ int main ()
           
           //The first term 'v_points.back()' represents the velocity term stored in the last entry of the v_points vector.
           //The calculation can be thought of as the difference between planned and actual.
-          error_throttle = v_points.back() - velocity;
+          error_throttle = v_points[close_id] - velocity;
 
 
 
           double throttle_output;
           double brake_output;
-          vector<double> throttles;
+
           /**
           * TODO (step 2): uncomment these lines
           **/
            // Compute control to apply
            pid_throttle.UpdateError(error_throttle);
 
-           throttles.push_back(pid_throttle.TotalError());
-
-           double throttle = getAverage(steer_outputs,window);
+           double throttle = pid_throttle.TotalError();
 
            // Adapt the negative throttle to break
            if (throttle > 0.0) {

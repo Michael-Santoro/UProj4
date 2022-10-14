@@ -54,6 +54,7 @@ double PID::TotalError() {
     * The code should return a value in the interval [output_lim_mini, output_lim_maxi]
    */
     double control = tau_p_ * prev_err_ + tau_i_ * tot_err_ + tau_d_ * diff_err_;
+    
     return boost::algorithm::clamp(control, out_lim_min_, out_lim_max_);
 }
 
