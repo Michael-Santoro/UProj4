@@ -9,13 +9,16 @@ In this project simulations will be ran using the Carla simulator there is a bas
 # Project Questions
 - Add the plots to your report and explain them (describe what you see)
 
-<img width="443" alt="Throttle_2" src="https://user-images.githubusercontent.com/74157573/195218893-03f3ba57-514b-4f23-bbf8-e1dddcd7c377.png">
+<img width="851" alt="Steer_3" src="https://user-images.githubusercontent.com/74157573/195918723-8b6d5dfd-8397-49bc-be7d-ece57b30e2c5.png">
 
-<img width="451" alt="Steer_2" src="https://user-images.githubusercontent.com/74157573/195218926-7fd0bb90-3266-41ee-b5fa-a53e895cce90.png">
+In the steering plot above we have the calculated error and the steering output plotted. The error is the actual yaw of the car difference from the planned yaw. It would be a poor control solution if we just used the error as the steer this would be a very uncomfortable ride. So the Steering output we can see how our PID controller transformed the error into something smoother. This is very apparent in the points from 20-30 are working well as the error increase the output occured but slower and at a lower magnitude.
 
+<img width="786" alt="Throttle_3" src="https://user-images.githubusercontent.com/74157573/195918735-85de368c-b4f1-40b8-bf91-bf37e4256fd7.png">
+
+In the above throttle plot we see the velocity error, brack output and throttle output. We can see how our pid controller has transformed the error decreasing the magnitude, and dampend spikes.
 
 - What is the effect of the PID according to the plots, how each part of the PID affects the control command?
-You can see the out put tracks with the error.
+The PID controller is porportional gain, derivative gain, and integral gain. Each of the factors the derivative and the integral coeffiicents can be thought of dampening and spring coeffiecients. All of these factors combined can be used to smooth the error into something more appropiate for the output. Again we are trying to avoid drastic actions in our car.
 
 - How would you design a way to automatically tune the PID parameters?
 I would use a type of grid search since the parameters are all related in the complex system. I would systematically change one gain, then have a way to score the out put and any collisions would parameters would be disregarded.
