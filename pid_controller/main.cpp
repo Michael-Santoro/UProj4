@@ -77,12 +77,17 @@ template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
-double getAverage(double arr[], int size) {
+double getAverage(vector<double> arr, int size) {
   int i, sum = 0;       
-  double avg;          
+  double avg;
+  int j = arr.size();
+  if (j < size) {
+    size = j;
+  }
 
    for (i = 0; i < size; ++i) {
-      sum += arr[i];
+     sum += arr[j];
+     j-=1;
    }
    avg = double(sum) / size;
 
@@ -259,7 +264,7 @@ int main ()
   pid_throttle.Init(0.2, 0.0009, 0.1, 1.0, -1.0); //Exp7: Car Slows at good distance from first car
   int window = 5;
   
-  h.onMessage([&pid_steer, &pid_throttle, &new_delta_time, &timer, &prev_timer, &i, &prev_timer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
+  h.onMessage([&pid_steer, &pid_throttle, &new_delta_time, &timer, &prev_timer, &i, &prev_timer,&window](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
   {
         auto s = hasData(data);
 
@@ -387,7 +392,9 @@ int main ()
           **/
            // Compute control to apply
            pid_throttle.UpdateError(error_throttle);
+
            throttles.push_back(pid_throttle.TotalError());
+
            double throttle = getAverage(steer_outputs,window);
 
            // Adapt the negative throttle to break
