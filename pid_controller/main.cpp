@@ -77,6 +77,18 @@ template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
+double getAverage(double arr[], int size) {
+  int i, sum = 0;       
+  double avg;          
+
+   for (i = 0; i < size; ++i) {
+      sum += arr[i];
+   }
+   avg = double(sum) / size;
+
+   return avg;
+}
+
 double angle_between_points(double x1, double y1, double x2, double y2){
   return atan2(y2-y1, x2-x1);
 }
@@ -229,7 +241,11 @@ int main ()
   //pid_steer.Init(1.2, 0.5, 0.5, 1.2, -1.2); //Exp5: Car Corrected to Soon, Reduce derivative
   //pid_steer.Init(1.2, 0.5, 0.1, 1.2, -1.2); //Exp6: Car is steering back and forth, Increase derivative
   //pid_steer.Init(1.2, 0.5, 0.1, 1.2, -1.2); //Exp6: Car is steering back and forth, Increase derivative
-  pid_steer.Init(1.2, 0.75, 0.75, 1.2, -1.2); //Exp6: Car is steering back and forth, Increase Integral term
+  //pid_steer.Init(1.2, 0.75, 0.75, 1.2, -1.2); //Exp6: Car is steering back and forth, Increase Integral term
+  pid_steer.Init(0.3, 0.01, 0.1, 1.2, -1.2); //Exp7: Car is steering back and forth, Increase Integral term
+  
+  
+  
   // initialize pid throttle
   /**
   * TODO (Step 1): create pid (pid_throttle) for throttle command and initialize values
@@ -239,7 +255,9 @@ int main ()
   //accelerator range is between [-1,1]
   
   //pid_throttle.Init(0.5, 0.0, 0.0, 1.0, -1.0); //Exp1: Accelration is Good with Porpotional Gain
-  pid_throttle.Init(0.15, 0.001, 0.1, 1.0, -1.0); //Exp2: Car Slows at good distance from first car
+  //pid_throttle.Init(0.15, 0.001, 0.1, 1.0, -1.0); //Exp2: Car Slows at good distance from first car
+  pid_throttle.Init(0.2, 0.0009, 0.1, 1.0, -1.0); //Exp7: Car Slows at good distance from first car
+  int window = 5;
   
   h.onMessage([&pid_steer, &pid_throttle, &new_delta_time, &timer, &prev_timer, &i, &prev_timer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
   {
@@ -309,7 +327,7 @@ int main ()
 
 
           double steer_output;
-
+          vector<double> steer_outputs;
           /**
           * TODO (step 3): compute the steer error (error_steer) from the position and the desired trajectory
           **/
@@ -324,7 +342,10 @@ int main ()
           **/
            // Compute control to apply
            pid_steer.UpdateError(error_steer);
-           steer_output = pid_steer.TotalError();
+          
+          steer_outputs.push_back(pid_steer.TotalError());
+          
+           steer_output = getAverage(steer_outputs,window);
 
            // Save data
            file_steer.seekg(std::ios::beg);
@@ -360,13 +381,14 @@ int main ()
 
           double throttle_output;
           double brake_output;
-
+          vector<double> throttles;
           /**
           * TODO (step 2): uncomment these lines
           **/
            // Compute control to apply
            pid_throttle.UpdateError(error_throttle);
-           double throttle = pid_throttle.TotalError();
+           throttles.push_back(pid_throttle.TotalError());
+           double throttle = getAverage(steer_outputs,window);
 
            // Adapt the negative throttle to break
            if (throttle > 0.0) {
